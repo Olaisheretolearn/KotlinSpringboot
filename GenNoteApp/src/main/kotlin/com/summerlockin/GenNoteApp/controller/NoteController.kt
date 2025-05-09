@@ -3,11 +3,7 @@ package com.summerlockin.GenNoteApp.controller
 import com.summerlockin.GenNoteApp.database.model.Note
 import com.summerlockin.GenNoteApp.database.repository.NoteRepository
 import org.bson.types.ObjectId
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.time.Instant
 
 @RestController
@@ -22,8 +18,9 @@ class NoteController(
         val title : String,
         val content: String,
         val color:Long,
-        val ownerId:String
+
     )
+    //delete DELETE http://localhost:8080/note/id
 
     data class NoteResponse(
         val id : String,
@@ -34,7 +31,8 @@ class NoteController(
     )
 
     @PostMapping
-     fun save(body :NoteRequest): NoteResponse {
+     fun save(
+        @RequestBody body :NoteRequest): NoteResponse {
        var note =  repository.save(
             Note(
                 id = body.id?.let{  ObjectId(it) }?: ObjectId.get() ,
@@ -42,7 +40,7 @@ class NoteController(
                 content = body.content,
                 color = body.color,
                 createdAt = Instant.now(),
-                ownerId = ObjectId(body.ownerId)
+                ownerId = ObjectId()
             )
         )
 
@@ -57,6 +55,14 @@ class NoteController(
             it.toResponse()
         }
     }
+
+    @DeleteMapping(path = ["/{id}"])
+
+    fun deleteById (
+        @PathVariable  id: String) {
+        repository.deleteById(ObjectId(id))
+    }
+
 
     fun Note.toResponse(): NoteController.NoteResponse {
         return NoteResponse(
