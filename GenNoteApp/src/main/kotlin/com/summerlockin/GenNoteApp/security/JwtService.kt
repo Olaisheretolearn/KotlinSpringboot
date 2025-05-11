@@ -1,5 +1,6 @@
 package com.summerlockin.GenNoteApp.security
 
+import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
@@ -39,4 +40,25 @@ class JwtService(
     fun generateRefreshToken(userId: String) :String{
         return generateToken(userId, type="refresh", refreshTokenValidityMs);
     }
+
+    fun validateAccessToken (token:String ) : Boolean {
+        val claims = parseAllClaims(token) ?: return false;
+        val tokenType = claims["type"] as? String?: false;
+        return tokenType == "access"
+    }
+
+    //all data that is saved in the token is passed by this method here
+    private fun parseAllClaims(token :String) : Claims? {
+        return try {
+            Jwts.parser()
+                .verifyWith(secretkey)
+                .build()
+                .parseSignedClaims(token)
+                .payload
+        } catch(e :Exception){
+            null
+        }
+    }
+
+
 }
