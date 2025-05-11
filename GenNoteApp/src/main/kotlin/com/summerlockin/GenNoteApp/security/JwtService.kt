@@ -20,6 +20,8 @@ class JwtService(
         type:String,
         expiry : Long
     ) :String {
+        val now = Date()
+        val expiryDate = Date(now.time + expiry)
         return Jwts.builder()
             .subject(userId)
             .claim("type", type)
@@ -27,5 +29,14 @@ class JwtService(
             .expiration(expiryDate)
             .signWith(secretkey, Jwts.SIG.HS256)
             .compact()
+    }
+
+
+    fun generateAccessToken(userId:String):String{
+        return generateToken(userId, type = "access", accessTokenValidityMS);
+    }
+
+    fun generateRefreshToken(userId: String) :String{
+        return generateToken(userId, type="refresh", refreshTokenValidityMs);
     }
 }
