@@ -47,6 +47,21 @@ class JwtService(
         return tokenType == "access"
     }
 
+    fun validateRefreshToken (token:String ) : Boolean {
+        val claims = parseAllClaims(token) ?: return false;
+        val tokenType = claims["type"] as? String?: false;
+        return tokenType == "refresh"
+    }
+
+    //Authorization : Bearer <token>
+    fun getUserIdFromToken(token : String) :String {
+        val rawToken = if(token.startsWith("Bearer ")){
+            token.removePrefix("Bearer ")
+        } else token
+        val claims = parseAllClaims(rawToken) ?: throw IllegalArgumentException("invalid token")
+        return claims.subject
+    }
+
     //all data that is saved in the token is passed by this method here
     private fun parseAllClaims(token :String) : Claims? {
         return try {
